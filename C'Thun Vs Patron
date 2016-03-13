@@ -1,0 +1,66 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Random r = new Random();
+            string final = "";
+            
+            for(int cthun = 6; cthun<=32; cthun++)
+            {
+                long[] stateCounts = new long[9];
+                int faceDamage = 0;
+                for (long c = 0; c < 10000000; c++)
+                {
+                    List<int> boardstate = new List<int>();
+                    boardstate.Add(0); //boardstate[0] is the face
+                    boardstate.Add(3); //adding the first patron
+                    for (int i = 0; i < cthun; i++)
+                    {
+                        int state = r.Next(0, boardstate.Count); //pick a random spot on board
+                        if (state == 0)
+                        {
+                            faceDamage++; //facedamage
+                        }
+                        else if (boardstate[state] == 1) //kills patrons
+                        {
+                            boardstate.RemoveAt(state);
+                            if (boardstate.Count == 1) //in the event no patrons are left (just face)
+                            {
+                                stateCounts[0]++;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            boardstate[state]--; //deal one damage to a patron
+                            if (boardstate.Count <= 7)
+                                boardstate.Add(3); //add a new one if board is nnot full
+                        }
+                    }
+
+                    stateCounts[boardstate.Count-1]++;
+                }
+                final += "|C\'Thun missiles:|"+cthun+"|\n";
+                final += "|----------------|---|\n";
+                final += "|Average Face Damage: |" + Math.Round((double)faceDamage / 10000000, 4) + "|\n";
+                for(int i = 0; i < 8; i++)
+                    final += ("|" + i + " Patrons: |" + Math.Round((double)stateCounts[i]/100000, 4)+"%") + "|\n";
+                final += "\n\n";
+                Console.WriteLine("Complete with " + cthun + " missiles!");
+            }
+            using (StreamWriter write = new StreamWriter("C:\\Users\\Cisco\\Desktop\\Patron vs C\'Thun Reddit Formatting.txt"))
+            {
+                write.WriteLine("10,000,000 simulations run per test case");
+                write.WriteLine();
+                write.WriteLine(final);
+            }
+        }
+    }
+}
